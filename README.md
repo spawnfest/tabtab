@@ -37,10 +37,11 @@ Name: You usually press `tab` twice to trigger autocomplete listing, hence `tabt
 
 ## Features
 
--   [ ] Core providers autocomplete (current functionality)
--   [ ] Plugin autocomplete
+-   [x] Core providers autocomplete (current functionality)
+-   [x] Plugin autocomplete
 -   [ ] Template autocomplete
 -   [ ] Autocomplete for `rebar3` aliases defined in `rebar.config`
 -   [ ] Autodetect shell type
 -   [ ] Instant integration
 -   [ ] Type hints
+-   [x] Support for OS-level aliases
