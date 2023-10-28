@@ -6,7 +6,7 @@
 %% Simplified argparse structures
 -type tt_argument() :: #{short => char() | undefined,
                         long => string() | undefined,
-                        type => atom | binary | boolean | float | integer | string,
+                        type => atom | binary | boolean | float | integer | string | keyval,
                         help => string()}.
 
 -type tt_command() :: #{name := string(),
@@ -21,17 +21,7 @@
 
 -export_type([tt_opts/0, tt_command/0, tt_argument/0]).
 
--export([command/3, command/4]).
-
-command(Type, CmdName, Data) ->
-    command(Type,
-            CmdName,
-            Data,
-            #{shell => bash,
-                hints => true,
-                type_hints => true,
-                integration => undefined,
-                aliases => []}).
+-export([command/4]).
 
 %% @doc Convert one of the supported data structures to tt_command().
 -spec command(argparse, CmdName::string(),argparse:command(), tt_opts()) -> tt_command();

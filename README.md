@@ -3,14 +3,17 @@
 Autocompletion generator for `rebar3`.
 
 ## Current drawbacks
-1. There is no autocomplete for `rebar3` plugins!
-2. There is no autocomplete for `rebar3` templates!
+1. There is no autocomplete for `rebar3` plugins! (nor providers, nor their flags)
+2. There is no autocomplete for `rebar3` templates! (nor template name, nor variables!)
 3. There is no autocomplete for `rebar3` aliases defined in `rebar.config`
 4. There is no autocomplete for profiles when performing `rebar3 as`
-5. There is no autocomplete for tasks when performing `rebar3 do`
-6. Current `rebar3` is static and handwritten - each update to providers may demand update in autocomplete **files** (update for each shell type!).
-7. No support for `rebar3` aliases. You wan't your autocompletion to trigger on `r3` or `rebar`? You need to modify the autocompletion file yourself :D
-8. No type hints for arguments
+5. (**!**)Whenever autocompleting flags, after you type the first flag, autocomplete is gone!
+6. There is no autocomplete for tasks when performing `rebar3 do`
+7. Current `rebar3` is static and handwritten - each update to providers may demand update in autocomplete **files** (update for each shell type!).
+8. No support for `rebar3` aliases. You wan't your autocompletion to trigger on `r3` or `rebar`? You need to modify the autocompletion file yourself :D
+9. No type hints for arguments
+10. Limited nesting support - you cant have a task that has tasks, etc.
+    -   only 1 previous word can be seen which could also cause collisions in nested commands!
 
 ## Why is this needed?
 Is there something more frustrating than a typo in the CLI? Also it gets your brain free of the following questions while developing:
@@ -37,11 +40,14 @@ Name: You usually press `tab` twice to trigger autocomplete listing, hence `tabt
 
 ## Features
 
--   [x] Core providers autocomplete (current functionality)
--   [x] Plugin autocomplete
--   [ ] Template autocomplete
--   [ ] Autocomplete for `rebar3` aliases defined in `rebar.config`
--   [ ] Autodetect shell type
--   [ ] Instant integration
+-   [x] **Dynamically generated providers autocomplete**
+-   [x] **Autocomplete for plugins** providers and their args
+-   [x] **Autocomplete for templates** and their variables
+-   [x] **Preserve autocomplete after first flag/arg**
+-   [x] Autocomplete for `rebar3` aliases defined in `rebar.config`
+-   [x] Autocomplete profile when running `rebar3 as`
+-   [x] Unlimited nesting possibilities supported! 
+-   [ ] Automatic integration
 -   [ ] Type hints
+-   [ ] Autodetect shell type
 -   [x] Support for OS-level aliases
