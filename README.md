@@ -5,7 +5,12 @@ Autocompletion generator for `rebar3`.
 ## Current drawbacks
 1. There is no autocomplete for `rebar3` plugins!
 2. There is no autocomplete for `rebar3` templates!
-3. Current `rebar3` is static and handwritten - each update to providers may demand update in autocomplete file.
+3. There is no autocomplete for `rebar3` aliases defined in `rebar.config`
+4. There is no autocomplete for profiles when performing `rebar3 as`
+5. There is no autocomplete for tasks when performing `rebar3 do`
+6. Current `rebar3` is static and handwritten - each update to providers may demand update in autocomplete **files** (update for each shell type!).
+7. No support for `rebar3` aliases. You wan't your autocompletion to trigger on `r3` or `rebar`? You need to modify the autocompletion file yourself :D
+8. No type hints for arguments
 
 ## Why is this needed?
 Is there something more frustrating than a typo in the CLI? Also it gets your brain free of the following questions while developing:
@@ -17,7 +22,8 @@ You can get *1* and *2* with `help` command, *3* with `rebar3 new` command and *
 
 There is also [this issue](https://github.com/erlang/rebar3/issues/2077) from one of the maintainers so I guess this will be welcome, although the issue doesn't mention autocompleting plugins/templates. 
 
-Goal: Create a provider that creates an autocompletion file based on the current configuration. This can lead to different autocompletion in different shell sessions, so basic mechanism for integration should also be supported.
+## Goal
+Create a plugin that creates an autocompletion file based on the current configuration. This can lead to different autocompletion in different shell sessions, so basic mechanism for integration should also be supported.
 
 Name: You usually press `tab` twice to trigger autocomplete listing, hence `tabtab`.
 
@@ -25,3 +31,16 @@ Name: You usually press `tab` twice to trigger autocomplete listing, hence `tabt
 
 -   Implement it as plugin or as part of `rebar3`?
     -   I decided to go with the plugin because I can develop it on my own if `rebar3` maintainers decide not to include it in `rebar3`. Also, it should be easy to convert plugin to core components, but not the other way around.
+-   Core part must support both `argparse` and `getopt` argument specification
+    -   Reason 1: `rebar3` may switch to `argparse` somewhere in the future
+    -   Reason 2: Core part could be used to autocomplete `escripts`.
+
+## Features
+
+-   [ ] Core providers autocomplete (current functionality)
+-   [ ] Plugin autocomplete
+-   [ ] Template autocomplete
+-   [ ] Autocomplete for `rebar3` aliases defined in `rebar.config`
+-   [ ] Autodetect shell type
+-   [ ] Instant integration
+-   [ ] Type hints
