@@ -20,9 +20,7 @@ cmd_clause(Cmd) ->
     nested_cmd_clause(Cmd, [], 1).
 
 -spec nested_cmd_clause(tabtab_core:tt_command(), [string()], pos_integer()) -> string().
-nested_cmd_clause(#{name:=Name}=Cmd,Prevs,Depth) ->
-    Args0 = maps:get(arguments, Cmd, []),
-    Cmds = maps:get(commands, Cmd, []),
+nested_cmd_clause(#{name:=Name,arguments:=Args0,commands:=Cmds},Prevs,Depth) ->
     {Args, KeyValArgs} = lists:partition(fun(#{type:=T}) -> T=/=keyval end, Args0),
     Opts = lists:map(fun(#{short:=S, long:=L}) -> {S,L} end,Args),
     {Shorts0,Longs0} = lists:unzip(Opts),

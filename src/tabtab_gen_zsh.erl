@@ -37,8 +37,7 @@ cmd_to_fun(Cmd, ["new","rebar3"]=Prev, TTOpts) ->
 %% Hack to support completing profiles in rebar3 as
 cmd_to_fun(#{name:="as"}=Cmd, ["rebar3"]=Prev, TTOpts) ->
     args_as_cmds(Cmd, Prev, TTOpts);
-cmd_to_fun(#{name:=Name}=Cmd, Prev, TTOpts) ->
-    Nested = maps:get(commands, Cmd, []),
+cmd_to_fun(#{name:=Name,commands:=Nested}=Cmd, Prev, TTOpts) ->
     CmdFun = lists:concat([
         "function "++function_name(Prev, Name)++" {\n",
         "  local -a commands\n",
@@ -51,8 +50,7 @@ cmd_to_fun(#{name:=Name}=Cmd, Prev, TTOpts) ->
     CmdFun ++ lists:concat([cmd_to_fun(C, [Name|Prev], TTOpts) || C <- Nested]).
 
 %% when we want to display arguments that dont start with "-"
-args_as_cmds(#{name:=Name}=Cmd, Prev, TTOpts) ->
-    Args = maps:get(arguments, Cmd, []),
+args_as_cmds(#{name:=Name,arguments:=Args}, Prev, TTOpts) ->
     Nested = [#{name=>L,
                 help=>H,
                 commands=>[],
@@ -91,18 +89,14 @@ nested_cmds(Cmds,Prev,TTOpts) ->
         "  esac\n"]).
 
 cmd_str(#{name:=N,help:=H}, _TTOpts) ->
-    "\""++N++":"++help(H)++"\"";
-cmd_str(#{name:=N}, _TTOpts) ->
-    "\""++N++"\"".
+    "\""++N++":"++help(H)++"\"".
 
 cmd_call_case(#{name:=Name}, Prev, _TTOpts) ->
     "  "++Name++")\n"
     "    "++function_name(Prev, Name)++"\n"
     "    ;;\n".    
 
-args(Cmd, _TTOpts) ->
-    Args = maps:get(arguments, Cmd, []),
-    Cmds = maps:get(commands, Cmd, []),
+args(#{arguments:=Args,commands:=Cmds}, _TTOpts) ->
     NoMore = (Args=:=[]) and (Cmds=:=[]),
     case NoMore of
         true ->
