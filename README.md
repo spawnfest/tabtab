@@ -85,7 +85,6 @@ Create a `rebar3` plugin that generates an completion file based on the current 
 -   Utilize `tabtab` to generate autocompletion for `escript`s
 
 
-
 ## Extras
 
 ### Configuration and options
@@ -143,3 +142,5 @@ Got inspired by 1Password completion generation. [Instructions for integrations]
 
 ## Contact
 marko.mindek@gmail.com
+
+**Note**: whole plugin was entirely developed during Spawnfest.
