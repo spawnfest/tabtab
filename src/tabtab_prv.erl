@@ -5,6 +5,7 @@
 
 -define(PROVIDER, tabtab).
 -define(DEPS, [app_discovery]).
+%% TODO definirani fileovi neka se zovu "_rebar3" i nek se spreme u _build/profile/completion/<shell>/_rebar3
 
 %% ===================================================================
 %% Public API
@@ -51,14 +52,18 @@ do(State) ->
 namespace_to_tt_commands(default,Providers,TTOpts) ->
     lists:map(fun(P)->provider_to_tt_command(P,TTOpts) end,Providers);
 namespace_to_tt_commands(Namespace,Providers,TTOpts) ->
-    [#{name=>atom_to_list(Namespace),
+    Name = atom_to_list(Namespace),
+    [#{name=>Name,
       commands=>lists:map(fun(P)->provider_to_tt_command(P,TTOpts) end, Providers),
-      arguments=>[]}].
+      arguments=>[],
+      help=>Name++" namespace"}].
 
 provider_to_tt_command(Provider,TTOpts) ->
     Opts = providers:opts(Provider),
     Name = providers:impl(Provider),
-    tabtab_core:command(getopt,atom_to_list(Name),Opts,TTOpts).
+    Cmd = tabtab_core:command(getopt,atom_to_list(Name),Opts,TTOpts),
+    Help = tabtab_prv_utils:get(short_desc, Provider),
+    Cmd#{help=>Help}.
 
 oracle(#{name:="new"}=Cmd, _TTOpts, State)->
     %% template autocomplete
@@ -67,7 +72,10 @@ oracle(#{name:="new"}=Cmd, _TTOpts, State)->
 oracle(#{name:="as"}=Cmd, _TTOpts, State) ->
     ConfigProfiles = rebar_opts:get(rebar_state:opts(State), profiles, []),
     %% TODO keyval nije dobro ime
-    Args = [#{long=>atom_to_list(ProfileName), type=>keyval} || {ProfileName,_} <- ConfigProfiles],
+    Args = [#{short=>undefined,
+            long=>atom_to_list(ProfileName),
+            help=>undefined,
+            type=>keyval} || {ProfileName,_} <- ConfigProfiles],
     Cmd#{arguments=>Args};
 oracle(Cmd,_,_) ->
     Cmd.
@@ -76,17 +84,17 @@ templates_as_commands(State) ->
     Templates = rebar_templater:list_templates(State),
     lists:map(fun template_as_command/1, Templates).
 
-template_as_command({Name, _Type, _File, _Desc, Vars}=Temp) ->
-    rebar_log:log(diagnostic,"Template: ~p~n",[Temp]),
-    %% TODO append "=" to those, not space!
+template_as_command({Name, _Type, _File, _Desc, Vars}) ->
     Args = [template_var_to_tt_arg(Var) || Var <- Vars],
     #{name=>Name,
     arguments=>Args}.
 
 template_var_to_tt_arg({Name, Default})->
-    template_var_to_tt_arg({Name, Default,""});
-template_var_to_tt_arg({Name, _Default,_Help})->
-    #{long=>atom_to_list(Name)++"=",
+    template_var_to_tt_arg({Name, Default,undefined});
+template_var_to_tt_arg({Name, _Default,Help})->
+    #{short=>undefined,
+    long=>atom_to_list(Name)++"=",
+    help=>Help,
     type=>keyval}.
 
 detect_shell() ->

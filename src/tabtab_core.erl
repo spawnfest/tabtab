@@ -10,6 +10,7 @@
                         help => string()}.
 
 -type tt_command() :: #{name := string(),
+                        help := string() | undefined,
                         arguments := [tt_argument()],
                         commands => [tt_command()]}.
 
@@ -26,8 +27,6 @@
 %% @doc Convert one of the supported data structures to tt_command().
 -spec command(argparse, CmdName::string(),argparse:command(), tt_opts()) -> tt_command();
             (getopt, CmdName::string(), [getopt:option_spec()], tt_opts()) -> tt_command().
-            %% TODO ovo ne treba biti tu nego negdje drugdje! loadaj templejte negdje drugdje (koristi ?TEMPLEATE_RE iz rebar.hrl)
-            %% (rebar3_template, {TName::string(),[{atom(),term()}]}, tt_opts()) -> tt_command().
 command(argparse, CmdName, _ArgParse, _TTOpts) ->
     %% TODO
     #{name => CmdName,

@@ -7,7 +7,7 @@ Autocompletion generator for `rebar3`.
 2. There is no autocomplete for `rebar3` templates! (nor template name, nor variables!)
 3. There is no autocomplete for `rebar3` aliases defined in `rebar.config`
 4. There is no autocomplete for profiles when performing `rebar3 as`
-5. (**!**)Whenever autocompleting flags, after you type the first flag, autocomplete is gone!
+5. Whenever autocompleting flags, after you type the first flag, autocomplete is gone!
 6. There is no autocomplete for tasks when performing `rebar3 do`
 7. Current `rebar3` is static and handwritten - each update to providers may demand update in autocomplete **files** (update for each shell type!).
 8. No support for `rebar3` aliases. You wan't your autocompletion to trigger on `r3` or `rebar`? You need to modify the autocompletion file yourself :D
@@ -41,13 +41,24 @@ Name: You usually press `tab` twice to trigger autocomplete listing, hence `tabt
 ## Features
 
 -   [x] **Dynamically generated providers autocomplete**
--   [x] **Autocomplete for plugins** providers and their args
--   [x] **Autocomplete for templates** and their variables
+-   [x] **Autocomplete for plugin** providers and their args
+-   [x] **Autocomplete for templates** and **their variables**
 -   [x] **Preserve autocomplete after first flag/arg**
 -   [x] Autocomplete for `rebar3` aliases defined in `rebar.config`
--   [x] Autocomplete profile when running `rebar3 as`
--   [x] Unlimited nesting possibilities supported! 
+-   [x] Autocomplete profile when running `rebar3 as` (currently only in `bash`, but its implementable in `zsh`)
+-   [x] **Unlimited nesting supported!** 
+    -  Ready to support `argparse` one day!
+-   [x] Autodetect shell type
 -   [ ] Automatic integration
 -   [ ] Type hints
--   [ ] Autodetect shell type
 -   [x] Support for OS-level aliases
+    -   Currently only in `bash`, because you need a separate file for `zsh`.
+        -   e.g. for alias `r3` you need file `_r3` somewhere in your `fpath` with the following contents:
+        -   ```shell
+            #compdef _r3 r3
+
+            function _r3 {
+                _rebar3
+            }   
+            ```
+    
