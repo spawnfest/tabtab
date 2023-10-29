@@ -1,4 +1,4 @@
-%% @doc Autocompletion file generator functions
+%% @doc Completion file generator for bash
 %% @end
 
 -module(tabtab_gen_bash).
@@ -62,7 +62,6 @@ do_match_prev_if_body([P | Rest],Cnt) ->
 
 main(Commands, #{shell:=bash, aliases:=Aliases}) ->
     MaxDepth=cmd_depth(Commands,1,0),
-    rebar_log:log(diagnostic,"MaxDepth: ~p~n",[MaxDepth]),
     CmdNames = [Name || #{name:=Name} <- Commands],
     Triggers = ["rebar3" | Aliases],
     TriggerConds = lists:map(fun(T) -> "${prev1} == \""++T++"\"" end, Triggers),

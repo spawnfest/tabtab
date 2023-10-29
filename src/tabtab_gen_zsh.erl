@@ -1,4 +1,4 @@
-%% @doc Autocompletion file generator functions
+%% @doc Completion file generator for zsh
 %% @end
 
 -module(tabtab_gen_zsh).
@@ -9,35 +9,34 @@
 
 -spec generate([tabtab_core:tt_command()], tabtab_core:tt_opts()) -> string().
 generate(Commands, #{shell:=zsh}=TTOpts) ->
-    lists:flatten([%%tabtab_gen_utils:header(TTOpts),
+    lists:concat([
+        "#compdef _rebar3 rebar3\n",
+        tabtab_gen_utils:header(TTOpts),
+        "\n",
         main(Commands, TTOpts),
         io_lib:nl()]).
 
 main(Commands, TTOpts) ->
-    "#compdef _rebar3 rebar3\n" ++
-    "\n" ++
-    cmd_to_fun(#{name=>"rebar3", help=>"Erlang build tool", commands=>Commands},
-                [], TTOpts).
+    H = #{short=>$s,
+            long=>"help",
+            help=>"Help about rebar3",
+            type=>boolean},
+    V = #{short=>$v,
+            long=>"version",
+            help=>"Version of rebar3",
+            type=>boolean},
+    Rebar = #{name=>"rebar3",
+            commands=>Commands,
+            arguments=>[H,V],
+            help=>"Erlang build tool"},
+    cmd_to_fun(Rebar, [], TTOpts).
 
 %% Hack to support key=value arguments in rebar3 new TEMPLATE
-cmd_to_fun(#{name:=Name}=Cmd, ["new","rebar3"]=Prev, TTOpts) ->
-    %% treat template variables as commands
-    Args = maps:get(arguments, Cmd, []),
-    Nested = [#{name=>L,
-                help=>H,
-                commands=>[],
-                arguments=>[]} || #{long:=L, help:=H} <- Args],
-    CmdFun = lists:concat([
-        "function "++function_name(Prev, Name)++" {\n",
-        "  local -a commands\n",
-        "\n",
-        "   _arguments \\\n",
-        "   \"*: :->cmnds\"\n",
-        "\n",
-        nested_cmds(Nested,[Name|Prev],TTOpts),
-        "}\n",
-        "\n"]),
-    CmdFun;
+cmd_to_fun(Cmd, ["new","rebar3"]=Prev, TTOpts) ->
+    args_as_cmds(Cmd, Prev, TTOpts);
+%% Hack to support completing profiles in rebar3 as
+cmd_to_fun(#{name:="as"}=Cmd, ["rebar3"]=Prev, TTOpts) ->
+    args_as_cmds(Cmd, Prev, TTOpts);
 cmd_to_fun(#{name:=Name}=Cmd, Prev, TTOpts) ->
     Nested = maps:get(commands, Cmd, []),
     CmdFun = lists:concat([
@@ -50,6 +49,24 @@ cmd_to_fun(#{name:=Name}=Cmd, Prev, TTOpts) ->
         "}\n",
         "\n"]),
     CmdFun ++ lists:concat([cmd_to_fun(C, [Name|Prev], TTOpts) || C <- Nested]).
+
+%% when we want to display arguments that dont start with "-"
+args_as_cmds(#{name:=Name}=Cmd, Prev, TTOpts) ->
+    Args = maps:get(arguments, Cmd, []),
+    Nested = [#{name=>L,
+                help=>H,
+                commands=>[],
+                arguments=>[]} || #{long:=L, help:=H} <- Args],
+    lists:concat([
+        "function "++function_name(Prev, Name)++" {\n",
+        "  local -a commands\n",
+        "\n",
+        "   _arguments \\\n",
+        "   \"*: :->cmnds\"\n",
+        "\n",
+        nested_cmds(Nested,[Name|Prev],TTOpts),
+        "}\n",
+        "\n"]).
 
 function_name(Prev,Name) ->
     "_" ++ string:join(
@@ -83,7 +100,7 @@ cmd_call_case(#{name:=Name}, Prev, _TTOpts) ->
     "    "++function_name(Prev, Name)++"\n"
     "    ;;\n".    
 
-args(Cmd, TTOpts) ->
+args(Cmd, _TTOpts) ->
     Args = maps:get(arguments, Cmd, []),
     Cmds = maps:get(commands, Cmd, []),
     NoMore = (Args=:=[]) and (Cmds=:=[]),
@@ -102,10 +119,10 @@ args(Cmd, TTOpts) ->
             end
     end.
 
-arg_str(#{short:=undefined,long:=undefined,help:=H,type:=T}) ->
+arg_str(#{short:=undefined,long:=undefined,help:=H}) ->
     "   "++"'1:"++H++":' \\\n"; 
 arg_str(#{help:=H,type:=T}=Arg) ->
-    "   "++spec(Arg) ++ "[" ++ help(H) ++ "]'" ++ hint(T) ++ " \\\n".
+    "   "++spec(Arg) ++ "[" ++ help(H) ++ "]'" ++ type_hint(T) ++ " \\\n".
 
 spec(#{short:=undefined,long:=L}) ->
     "'(--"++[L]++")--"++L++"";
@@ -120,11 +137,17 @@ help(H) -> help_escape(H).
 help_escape([]) ->
     [];
 %% "("
-help_escape([40 | Rest]) ->
+help_escape([40 | Rest]) -> 
     "\\("++help_escape(Rest);
 %% ")"
 help_escape([41 | Rest]) ->
     "\\)"++help_escape(Rest);
+%% "["
+help_escape([91| Rest]) ->
+    "\\["++help_escape(Rest);
+%% "]"
+help_escape([93| Rest]) ->
+    "\\]"++help_escape(Rest);
 %% doubling single quotes by doubling them
 help_escape([$' | Rest]) ->
     "''"++help_escape(Rest);
@@ -132,5 +155,5 @@ help_escape([C | Rest]) ->
     [C | help_escape(Rest)].
 
 %% TODO
-hint(_) ->
+type_hint(_) ->
     "".
