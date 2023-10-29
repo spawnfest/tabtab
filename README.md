@@ -61,7 +61,7 @@ Create a `rebar3` plugin that generates an completion file based on the current 
         ```
         
     -   **2. method**
-        -   Put `{project_plugins, [{rebar3_gen_pkgs, {git, "git@github.com:spawnfest/tabtab.git", {branch, "master"}}}]}` in `rebar.config`
+        -   Put `{project_plugins, [{tabtab, {git, "https://github.com/spawnfest/tabtab.git", {branch, "master"}}}]}` in `rebar.config`
 2.  Run `rebar3 compile` or `rebar3 plugins list` to compile `tabtab` plugin
 3.  Run `rebar3 tabtab` to generate a completion file
     -   shell type is autodetected via `$SHELL` variable, but you can specify it via `-s` flag
