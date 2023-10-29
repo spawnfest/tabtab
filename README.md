@@ -17,7 +17,7 @@ Rebar3 plugin - autocompletion generator for `rebar3`.
 There actually exist [an issue](https://github.com/erlang/rebar3/issues/2077) from one of the `rebar3` maintainers so I guess this will be welcome, although the issue doesn't mention autocompleting plugins/templates and other stuff. I believe that, if proven useful, this may become integrated into `rebar3`.
 
 ## Goal
-Create a `rebar3` plugin that generates an completion file based on the current configuration of the project. This can lead to different completions in different shell sessions, so basic mechanism for integration should also be supported. Without good autocomplete it's hard to use tools that have a lot of (nested) commands (e.g. kubernetes, docker, 1password, ...) - like programming without LSP.
+Create a `rebar3` plugin that generates an completion file based on the current configuration of the project. This can lead to different completions in different shell sessions, so basic mechanism for integration should also be supported. Without good autocomplete it's hard to use tools that have a lot of (nested) commands (e.g. rebar3_hex plugin) - like programming without LSP.
 
 ## Non-goals (currently)
 -   Efficiency - I've abused `lists:concat/1` and strings *a lot*!
@@ -36,7 +36,7 @@ Create a `rebar3` plugin that generates an completion file based on the current 
     -  Ready to support `argparse` one day!
 -   [x] Autodetect shell type
 -   [ ] Automatic integration
-    -  Probably doable via rebar hooks!
+    -  Probably doable via rebar hooks, but that requires this provider to become hookable!
 -   [ ] Type hints
 -   [x] Support for OS-level aliases
     -   Out-of-the-box only in `bash`, 
@@ -77,10 +77,12 @@ Create a `rebar3` plugin that generates an completion file based on the current 
 5.  **Enjoy** not trying to remember all plugin commands and flags :D
 
 ## Future work
--   Support more shells types
--   Style improvements
--   Utilize `tabtab` to generate autocompletion for `escript`s
 -   Automatic integration of completion files
+-   Support more shells types
+-   Finish listed features
+-   Style improvements
+-   Error handling
+-   Utilize `tabtab` to generate autocompletion for `escript`s
 
 
 
@@ -95,6 +97,7 @@ Configuration:
               {aliases, [string()]}]}
 ```
 -   `file` - absolute or relative (to `_build/<profile/`)
+    -   target directory will be created if missing
 -   `aliases` - list of strings on which you want to trigger autocomplete
 
 Options:
@@ -133,7 +136,7 @@ function _r3 {
     _rebar3
 }   
 ```
-and then load that file as the original completion file.
+and then load that file the same way as the original completion file.
 
 ### Inspo
 Got inspired by 1Password completion generation. [Instructions for integrations](https://developer.1password.com/docs/cli/reference/commands/completion/) are also mostly theirs.

@@ -1,4 +1,4 @@
-%% @doc TODO
+%% @doc Common stuff for generating completion files
 %% @end
 
 -module(tabtab_gen_utils).

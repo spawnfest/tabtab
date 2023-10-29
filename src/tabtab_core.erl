@@ -31,7 +31,7 @@
 -spec command(argparse, CmdName::string(), argparse:command(), tt_opts()) -> tt_command();
             (getopt, CmdName::string(), [getopt:option_spec()], tt_opts()) -> tt_command().
 command(argparse, CmdName, _ArgParse, _TTOpts) ->
-    %% TODO this is currently not important, but should be trivial
+    %% TODO this is currently not important/used, but is trivial to implement
     #{name => CmdName,
     arguments => [],
     commands => [],

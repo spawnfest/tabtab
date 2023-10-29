@@ -6,7 +6,7 @@
 
 -define(PROVIDER, tabtab).
 -define(DEPS, [app_discovery]).
-%% TODO definirani fileovi neka se zovu "_rebar3" i nek se spreme u _build/profile/completion/<shell>/_rebar3
+-define(THROW_REBAR(R), throw({error, {?MODULE, R}})).
 
 %% ===================================================================
 %% Public API
@@ -19,7 +19,6 @@ init(State) ->
             {bare, true},                 % The task can be run by the user, always true
             {deps, ?DEPS},                % The list of dependencies
             {example, "rebar3 tabtab"}, % How to use the plugin
-            %% TODO opts
             {opts, [
                 {shell, $s, "shell", {atom,detect_shell()}, "Shell type, bash or zsh"},
                 {hints, $h, "hints", {boolean, true}, "Describe arguments/commands in completion (defaults to true)"},
@@ -33,12 +32,13 @@ init(State) ->
 -spec do(rebar_state:t()) -> {ok, rebar_state:t()} | {error, string()}.
 do(State) ->
     {CliOpts, _} = rebar_state:command_parsed_args(State),
+    DefaultConf = [{aliases,[]},{file,"_rebar3"}],
+    Conf = rebar_state:get(State, tabtab, [])++DefaultConf,
     TTOpts = #{shell=>proplists:get_value(shell, CliOpts),
                 hints=>proplists:get_value(hints, CliOpts),
                 type_hints=>proplists:get_value(type_hints, CliOpts),
-                %% TODO expose opts via config
-                aliases=>[],
-                file=>"_rebar3"},
+                aliases=>proplists:get_value(aliases, Conf),
+                file=>proplists:get_value(file, Conf)},
     
     Providers0 = rebar_state:providers(State),
     BareProviders = lists:filter(fun tabtab_prv_utils:bare/1, Providers0),
@@ -50,8 +50,12 @@ do(State) ->
     Cmds = lists:map(fun (Cmd) -> oracle(Cmd, TTOpts, State) end, Cmds0),
     Compl = tabtab_gen:generate(Cmds, TTOpts),
 
-    write_completion(Compl,State,TTOpts),
-    {ok, State}.
+    case write_completion(Compl,State,TTOpts) of
+        ok ->
+            {ok, State};
+        {error,_}=Err ->
+            Err
+    end.
 
 namespace_to_tt_commands(default,Providers,TTOpts) ->
     lists:map(fun(P)->provider_to_tt_command(P,TTOpts) end,Providers);
@@ -115,12 +119,23 @@ detect_shell() ->
     end.
 
 write_completion(CompletionStr, State, #{file:=Filename}) ->
-    Dir = rebar_dir:base_dir(State),
-    Dest = filename:join(Dir, Filename),
-    rebar_log:log(diagnostic,"Writing completion file to: ~p~n",[Dest]),
-    %% TODO handle errors
-    ok = file:write_file(Dest, CompletionStr, [raw]).
+    BaseDir = rebar_dir:base_dir(State),
+    Dest = filename:join(BaseDir, Filename),
+    case filelib:ensure_dir(Dest) of
+        ok ->
+            rebar_log:log(diagnostic,"Writing completion file to: ~p~n",[Dest]),
+            case file:write_file(Dest, CompletionStr, [write, raw]) of
+                ok ->
+                    ok;
+                {error,Err} ->
+                    ?THROW_REBAR({error_writing_file,Dest,Err})
+            end;
+        {error,Err} ->
+            ?THROW_REBAR({error_creating_dir,filename:dirname(Dest),Err})
+    end.
 
 -spec format_error(any()) ->  iolist().
-format_error(Reason) ->
-    io_lib:format("~p", [Reason]).
+format_error({error_writing_file,Dest,Err}) ->
+    io_lib:format("Error occurred when trying to write into ~p file.~nReason: ~p~n", [Dest,Err]);
+format_error({error_creating_dir,Dir,Err}) ->
+    io_lib:format("Error occurred when trying to create dir: ~p.~nReason: ~p~n", [Dir,Err]).
