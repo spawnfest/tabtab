@@ -17,7 +17,7 @@ Rebar3 plugin - autocompletion generator for `rebar3`.
 There actually exist [an issue](https://github.com/erlang/rebar3/issues/2077) from one of the `rebar3` maintainers so I guess this will be welcome, although the issue doesn't mention autocompleting plugins/templates and other stuff. I believe that, if proven useful, this may become integrated into `rebar3`.
 
 ## Goal
-Create a `rebar3` plugin that generates an completion file based on the current configuration of the project. This can lead to different completions in different shell sessions, so basic mechanism for integration should also be supported.
+Create a `rebar3` plugin that generates an completion file based on the current configuration of the project. This can lead to different completions in different shell sessions, so basic mechanism for integration should also be supported. Without good autocomplete it's hard to use tools that have a lot of (nested) commands (e.g. kubernetes, docker, 1password, ...) - like programming without LSP.
 
 ## Non-goals (currently)
 -   Efficiency - I've abused `lists:concat/1` and strings *a lot*!
@@ -31,7 +31,8 @@ Create a `rebar3` plugin that generates an completion file based on the current 
 -   [x] **Preserve autocomplete after first flag/arg**
 -   [x] Autocomplete for `rebar3` aliases defined in `rebar.config`
 -   [x] Autocomplete profile when running `rebar3 as`
--   [x] **Unlimited nesting supported!** 
+-   [ ] Autocomplete tasks when running `rebar3 do`
+-   [x] **Unlimited command nesting supported!** 
     -  Ready to support `argparse` one day!
 -   [x] Autodetect shell type
 -   [ ] Automatic integration
@@ -40,11 +41,6 @@ Create a `rebar3` plugin that generates an completion file based on the current 
 -   [x] Support for OS-level aliases
     -   Out-of-the-box only in `bash`, 
     -   For `zsh` read [this](#zsh-trigger-autocomplete-on-alias).
-
-## Future work
--   Support more shells types
--   Style improvement
--   Utilize `tabtab` to generate autocompletion for `escript`s
 
 ## Demo
 ### Prerequisites:
@@ -78,7 +74,14 @@ Create a `rebar3` plugin that generates an completion file based on the current 
         -   If first time doing `zsh` autocompletion, read [this](#zsh-tutorial)
         -   run `eval "$(cat $PATH_TO_COMPLETION_FILE)"; compdef _rebar3 rebar3`
             -   or `source ~/.zshrc` (if your file is somewhere in `$fpath`)
-5.  Enjoy not trying to remember all plugin commands and flags :D
+5.  **Enjoy** not trying to remember all plugin commands and flags :D
+
+## Future work
+-   Support more shells types
+-   Style improvements
+-   Utilize `tabtab` to generate autocompletion for `escript`s
+-   Automatic integration of completion files
+
 
 
 ## Extras
@@ -119,16 +122,16 @@ I've had some troubles with zsh autocompletion because I've done it first time, 
         autoload -U compinit; compinit
         ```
 
-**(!)**With `zsh` it is important that the completion file is named exactly `_rebar3`!
+**!** With `zsh` it is important that the completion file is named exactly as completion function it introduces! (`_rebar3` in this case)
 
 #### ZSH trigger autocomplete on alias
 For alias e.g. `r3` you need file `_r3` somewhere in your `fpath` with the following contents:
 ```shell
-    #compdef _r3 r3
+#compdef _r3 r3
 
-    function _r3 {
-        _rebar3
-    }   
+function _r3 {
+    _rebar3
+}   
 ```
 and then load that file as the original completion file.
 
