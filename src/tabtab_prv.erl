@@ -50,12 +50,8 @@ do(State) ->
     Cmds = lists:map(fun (Cmd) -> oracle(Cmd, TTOpts, State) end, Cmds0),
     Compl = tabtab_gen:generate(Cmds, TTOpts),
 
-    case write_completion(Compl,State,TTOpts) of
-        ok ->
-            {ok, State};
-        {error,_}=Err ->
-            Err
-    end.
+    write_completion(Compl,State,TTOpts),
+    {ok, State}.
 
 namespace_to_tt_commands(default,Providers,TTOpts) ->
     lists:map(fun(P)->provider_to_tt_command(P,TTOpts) end,Providers);
