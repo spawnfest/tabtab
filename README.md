@@ -53,12 +53,12 @@ Create a `rebar3` plugin that generates an completion file based on the current 
 1.  Include `tabtab` in `project_plugins` in `rebar3.config`
     -   **1. method** (recommended if you want to modify something in the program)
         1.   Clone `tabtab`
-        2.   Put `{project_plugins, [tabtab]}` in `rebar.config`
-        3.   `cd` to some rebar3 project and run the following:
+        2.   `cd` to some rebar3 project and run the following:
         ```shell
         mkdir -p _checkouts
         ln -s $PATH_TO_TABTAB_DIR _checkouts/tabtab 
         ```
+        3.  Put `{project_plugins, [tabtab]}` in `rebar.config`
         
     -   **2. method**
         -   Put `{project_plugins, [{tabtab, {git, "https://github.com/spawnfest/tabtab.git", {branch, "master"}}}]}` in `rebar.config`
@@ -98,7 +98,7 @@ Configuration:
 ```
 -   `file` - absolute or relative (to `_build/<profile/`)
     -   target directory will be created if missing
--   `aliases` - list of strings on which you want to trigger autocomplete
+-   `aliases` - list of strings on which you want to trigger autocomplete, e.g. `["r3", "rebar"]`
 
 Options:
 |   Short   |   Long      |   Value   | Default |
@@ -140,3 +140,6 @@ and then load that file the same way as the original completion file.
 
 ### Inspo
 Got inspired by 1Password completion generation. [Instructions for integrations](https://developer.1password.com/docs/cli/reference/commands/completion/) are also mostly theirs.
+
+## Contact
+marko.mindek@gmail.com
